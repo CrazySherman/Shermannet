@@ -1,10 +1,13 @@
 import os 
 import numpy as np
 import caffe
-import cv2
+from skimage import io as skiio
+from skimage.transform import resize
+## this shit doesn't have opencv installed
+#import cv2
 import random, lmdb, csv
 
-os.chdir('/Users/wsm/Downloads/imgs')
+os.chdir('~/Kaggle_driver_dataset')
 imgs_size = 4000000000
 map_size = imgs_size * 5
 # desired resize for the resulted imgs
@@ -18,8 +21,10 @@ def load_imgs_from_dict(dict, keys, txn):
     for i in keys:
         for file in dict[i]:
             label = int(file.split('/')[1][1:])
-            img = cv2.imread(file)
-            img = cv2.resize(img, (w, h)).transpose(2,0,1)
+            img = skiio.imread(file)
+            #img = cv2.resize(img, (w, h)).transpose(2,0,1)
+            img = img[:,:,[2,1,0]]  #Skimage read that shit as BGR, fuq
+            img = resize(img, (h,w)).transpose(2,0,1)
             datum = caffe.io.array_to_datum(img, label) 
             str_id = '{:08}'.format(counter)
             txn.put(str_id.encode('ascii'), datum.SerializeToString())
