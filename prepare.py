@@ -1,35 +1,35 @@
 import os 
 import numpy as np
 import caffe
-from skimage import io as skiio
-from skimage.transform import resize
-## this shit doesn't have opencv installed
-#import cv2
+#from skimage import io as skiio
+#from skimage.transform import resize
+import cv2
 import random, lmdb, csv
 
-os.chdir('~/Kaggle_driver_dataset')
+os.chdir('/home/nesl/Kaggle_driver_dataset/')
 imgs_size = 4000000000
 map_size = imgs_size * 5
 # desired resize for the resulted imgs
 h = 256
 w = 256
 env = lmdb.open('kaggle_train_lmdb', map_size=map_size)
-env2 = lmdb.open('kaggle_test_lmdb', map_size=map_size/ 10)
+env2 = lmdb.open('kaggle_test_lmdb', map_size=map_size/10)
 
 def load_imgs_from_dict(dict, keys, txn):
     counter = 0
     for i in keys:
         for file in dict[i]:
             label = int(file.split('/')[1][1:])
-            img = skiio.imread(file)
-            #img = cv2.resize(img, (w, h)).transpose(2,0,1)
-            img = img[:,:,[2,1,0]]  #Skimage read that shit as BGR, fuq
-            img = resize(img, (h,w)).transpose(2,0,1)
+            img = cv2.imread(file)
+            img = cv2.resize(img, (w, h)).transpose(2,0,1)            
+            #img = skiio.imread(file)
+            #img = img[:,:,[2,1,0]]  #Skimage read that shit as BGR, fuq
+            #img = resize(img, (h,w)).transpose(2,0,1)
             datum = caffe.io.array_to_datum(img, label) 
             str_id = '{:08}'.format(counter)
             txn.put(str_id.encode('ascii'), datum.SerializeToString())
             counter += 1
-            # print 'processing img ', file, ': ', str_id + ', ' + str(label)
+            #print 'processing img ', file, ': ', str_id + ', ' + str(label)
 
 
 arr = []

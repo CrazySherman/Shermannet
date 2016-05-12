@@ -23,8 +23,8 @@ layer {
 #    mirror: true
 #  }
   data_param {
-    source: "/Users/wsm/Downloads/imgs/kaggle_train_lmdb"
-    batch_size: 64
+    source: "/home/nesl/Kaggle_driver_dataset/kaggle_train_lmdb/"
+    batch_size: 256
     backend: LMDB
   }
 }
@@ -50,8 +50,8 @@ layer {
 #    mirror: false
 #  }
   data_param {
-    source: "/Users/wsm/Downloads/imgs/kaggle_test_lmdb"
-    batch_size: 64
+    source: "/home/nesl/Kaggle_driver_dataset/kaggle_test_lmdb/"
+    batch_size: 256
     backend: LMDB
   }
 }
