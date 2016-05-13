@@ -1,0 +1,11 @@
+(dp0
+S'augmType'
+p1
+(lp2
+sS'data'
+p3
+(lp4
+sS'label'
+p5
+(lp6
+s.

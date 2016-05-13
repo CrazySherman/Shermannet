@@ -1,38 +1,67 @@
 import os 
 import numpy as np
 import caffe
+#from skimage import io as skiio
+#from skimage.transform import resize
 import cv2
 import random, lmdb, csv
 from skimage import io as skiio
 from skimage.transform import resize
+from data_aug import aug_algo
 
-os.chdir('/Users/wsm/Downloads/imgs')
+os.chdir('/home/nesl/Kaggle_driver_dataset/')
 imgs_size = 4000000000
-map_size = imgs_size * 5
+map_size = imgs_size * 10
 # desired resize for the resulted imgs
 h = 256
 w = 256
 env = lmdb.open('kaggle_train_lmdb', map_size=map_size)
-env2 = lmdb.open('kaggle_test_lmdb', map_size=map_size/ 10)
+env2 = lmdb.open('kaggle_test_lmdb', map_size=map_size/10)
 
-def load_imgs_from_dict(dict, keys, txn):
+
+def load_imgs_from_dict(dict, keys, txn, augment=False):
     counter = 0
     for i in keys:
         for file in dict[i]:
             label = int(file.split('/')[1][1:])
             ## using opencv
             img = cv2.imread(file)
-            img = cv2.resize(img, (w, h)).transpose(2,0,1)
+            
             ## using skimage -- this shit is way too slow
             # img = skiio.imread(file)
             # img = img[:,:,[2,1,0]]  #Skimage read that shit as BGR, fuq
             # img = resize(img, (h,w)).transpose(2,0,1)
-
-            datum = caffe.io.array_to_datum(img, label) 
-            str_id = '{:08}'.format(counter)
-            txn.put(str_id.encode('ascii'), datum.SerializeToString())
-            counter += 1
-            print 'processing img ', file, ': ', str_id + ', ' + str(label)
+            imgs = [img]
+            ## data augmentation
+            if (augment):
+            ## Shift left
+                img_shift_left = algo.horizShiftLeft(img, 0.05, 0.15)
+                imgs.append(img_shift_left)
+            ## Shift Right
+                img_shift_right = algo.horizShiftRight(img, 0.05, 0.15)
+                imgs.append(img_shift_right)
+            ## Vertical shift up
+                img_shift_up = algo.vertiShiftUp(img, 0.05, 0.15)
+                imgs.append(img_shift_up)
+            ## Vertical shift down
+                img_shift_down = algo.vertiShiftDown(img, 0.05, 0.15)
+                imgs.append(img_shift_down)
+            ## Rotate CCW
+                img_rotate_cw = algo.rotatedCW(img, 0.15, 0.25, 1.2)
+                imgs.append(img_rotate_cw)
+            ## Rotate CW
+                img_rotate_ccw = algo.rotatedCCW(img, 0.15, 0.25, 1.2)
+                imgs.append(img_rotate_ccw)
+            ## Crop and zoom
+                img_zoom = algo.cropSkretch(img, 0.05, 0.15)
+                imgs.append(img_zoom)
+            for img in imgs:
+                img = cv2.resize(img, (w, h)).transpose(2,0,1)
+                datum = caffe.io.array_to_datum(img, label) 
+                str_id = '{:08}'.format(counter)
+                txn.put(str_id.encode('ascii'), datum.SerializeToString())
+                counter += 1
+                print 'processing img ', file, ': ', str_id + ', ' + str(label)
 
 
 arr = []
