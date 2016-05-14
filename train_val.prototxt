@@ -290,7 +290,7 @@ layer {
   }
   param {
     lr_mult: 20
-    decay_mult: 0
+    decay_mult: 0     # do not penalize biase values with regularization, hmmm interesting thoughts
   }
   inner_product_param {
     num_output: 4096

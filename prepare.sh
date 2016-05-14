@@ -1,6 +1,7 @@
 #!/bin/bash
 echo 'removing useless shit from img/ foler... '
 
-rm -rv ~/Kaggle_driver_dataset/kaggle*lmdb
+rm -rv ../../data/kaggle/kaggle*lmdb
 
-python prepare.py
+
+python prepare.py $1
